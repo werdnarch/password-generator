@@ -8,7 +8,7 @@ import { ArrowRight } from "lucide-react";
 export default function Home() {
   const defaultPassword = "P4$5W0rD!";
   const [generated, setGenerated] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
+
   const [length, setLength] = useState<number>(0);
   const [includesUppercase, setIncludesUppercase] = useState<boolean>(false);
   const [includesLowercase, setIncludesLowercase] = useState<boolean>(false);
@@ -54,8 +54,8 @@ export default function Home() {
   }, [includesUppercase, includesLowercase, includesNumbers, includesSymbols]);
 
   useEffect(() => {
-    if (password?.trim() === "") {
-      setPassword(defaultPassword);
+    if (generated?.trim() === "") {
+      setGenerated(defaultPassword);
     }
   }, []);
 
@@ -164,7 +164,13 @@ export default function Home() {
         {/* DISPLAY THE PASSWORD */}
 
         <div className="p-5 container flex items-center justify-between">
-          <h1 className="text-3xl font-semibold">{generated}</h1>
+          <h1
+            className={` ${
+              generated === defaultPassword && "text-zinc-600"
+            } text-3xl font-semibold`}
+          >
+            {generated}
+          </h1>
 
           {/* COPY BUTTON */}
           <CopyButton password={generated} />

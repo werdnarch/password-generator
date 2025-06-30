@@ -17,7 +17,6 @@ export default function CopyButton({ password }: CopyButtonProps) {
     document.execCommand("copy");
     document.body.removeChild(textarea);
   }
-  if (!password) return null;
 
   return (
     <button
