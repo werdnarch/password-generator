@@ -3,7 +3,10 @@
 import { use, useEffect, useState } from "react";
 import CopyButton from "../components/ui/CopyButton";
 import Option from "../components/ui/Option";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Bold } from "lucide-react";
+import StrengthBars from "../components/ui/StrengthBars";
+
+type strength = "Too Weak" | "Weak" | "Medium" | "Strong";
 
 export default function Home() {
   const defaultPassword = "P4$5W0rD!";
@@ -15,6 +18,7 @@ export default function Home() {
   const [includesNumbers, setIncludesNumbers] = useState<boolean>(false);
   const [includesSymbols, setIncludesSymbols] = useState<boolean>(false);
   const [disabled, setDisabled] = useState<boolean>(true);
+  const [strengthStatus, setStrengthStatus] = useState<strength>("Too Weak");
 
   const upperCaseChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
   const lowerCaseChars = "abcdefghijklmnopqrstuvwxyz";
@@ -154,6 +158,86 @@ export default function Home() {
       setGenerated("");
     }
   };
+
+  /* DETERMING THE STRENGTH OF THE PASSWORD */
+
+  useEffect(() => {
+    const charTypes = [
+      includesLowercase,
+      includesUppercase,
+      includesNumbers,
+      includesSymbols,
+    ].filter(Boolean).length;
+
+    if (charTypes === 0) {
+      setStrengthStatus("Too Weak");
+      return;
+    }
+
+    const getStrength = (len: number, levels: number[]) => {
+      if (len < levels[0]) return "Too Weak";
+      if (len < levels[1]) return "Weak";
+      if (len < levels[2]) return "Medium";
+      return "Strong";
+    };
+
+    let strength;
+
+    switch (charTypes) {
+      case 1:
+        if (includesNumbers || includesSymbols) {
+          strength = getStrength(length, [7, 10, 13]);
+        } else if (includesUppercase) {
+          strength = getStrength(length, [9, 13, 17]);
+        } else {
+          strength = getStrength(length, [10, 14, 19]);
+        }
+        break;
+
+      case 2:
+        if (!includesNumbers && !includesSymbols) {
+          strength = getStrength(length, [8, 12, 16]);
+        } else if (includesNumbers && includesSymbols) {
+          strength = getStrength(length, [5, 7, 9]);
+        } else if (includesSymbols || includesNumbers) {
+          strength = getStrength(
+            length,
+            includesUppercase ? [6, 8, 11] : [6, 9, 12]
+          );
+        }
+        break;
+
+      case 3:
+        if (includesNumbers && includesSymbols) {
+          strength = getStrength(
+            length,
+            includesUppercase ? [4, 6, 7] : [4, 6, 8]
+          );
+        } else if (includesNumbers || includesSymbols) {
+          strength = getStrength(
+            length,
+            includesNumbers ? [6, 8, 11] : [5, 8, 10]
+          );
+        }
+        break;
+
+      case 4:
+        strength = getStrength(length, [4, 5, 7]);
+        break;
+
+      default:
+        strength = "Too Weak";
+    }
+
+    setStrengthStatus(strength as strength);
+  }, [
+    includesLowercase,
+    includesUppercase,
+    includesNumbers,
+    includesSymbols,
+    length,
+  ]);
+
   return (
     <main className="h-full flex items-center justify-center">
       <section className="w-[90%] max-w-[600px]  flex flex-col items-center gap-8">
@@ -221,6 +305,15 @@ export default function Home() {
               id="symbols"
               option="Symbols"
             />
+          </div>
+
+          <div className="flex bg-[#18161E] p-4 items-center justify-between w-full">
+            <p className="text-lg text-zinc-500 font-bold ">STRENGTH</p>
+
+            <div className="flex items-center gap-4">
+              <p className="uppercase text-lg">{strengthStatus}</p>
+              <StrengthBars strengthStatus={strengthStatus} />
+            </div>
           </div>
 
           <div className="w-full">
